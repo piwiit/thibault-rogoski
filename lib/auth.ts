@@ -25,7 +25,7 @@ export async function getSession(): Promise<number | null> {
         if (isNaN(userId)) return null;
 
         // Vérifier que l'utilisateur existe toujours
-        const user = await (prisma as any).user.findUnique({ where: { id: userId } });
+        const user = await prisma.user.findUnique({ where: { id: userId } });
         return user ? userId : null;
     } catch {
         return null;
@@ -37,11 +37,11 @@ export async function destroySessionCookie(): Promise<string> {
 }
 
 export async function initAdminUser() {
-    const existingUser = await (prisma as any).user.findUnique({ where: { username: 'admin' } });
+    const existingUser = await prisma.user.findUnique({ where: { username: 'admin' } });
 
     if (!existingUser) {
         const passwordHash = await hashPassword('admin');
-        await (prisma as any).user.create({
+        await prisma.user.create({
             data: {
                 username: 'admin',
                 passwordHash,

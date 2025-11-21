@@ -19,7 +19,7 @@ export async function GET(
             return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
         }
 
-        const project = await (prisma as any).project.findUnique({ where: { id } });
+        const project = await prisma.project.findUnique({ where: { id } });
 
         if (!project) {
             return NextResponse.json({ error: 'Project not found' }, { status: 404 });
@@ -61,7 +61,7 @@ export async function PUT(
             imageUrl: parsed.data.imageUrl && parsed.data.imageUrl.trim() !== '' ? parsed.data.imageUrl : null,
         };
 
-        const project = await (prisma as any).project.update({
+        const project = await prisma.project.update({
             where: { id },
             data: projectData,
         });
@@ -88,7 +88,7 @@ export async function DELETE(
             return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
         }
 
-        await (prisma as any).project.delete({ where: { id } });
+        await prisma.project.delete({ where: { id } });
 
         return NextResponse.json({ success: true, message: 'Project deleted' });
     } catch (e) {
