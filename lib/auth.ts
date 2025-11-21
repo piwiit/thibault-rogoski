@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { prisma } from './prisma';
 import bcrypt from 'bcryptjs';
 
+// Hash the password
 export async function hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, 10);
 }
