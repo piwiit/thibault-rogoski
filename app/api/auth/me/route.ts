@@ -13,7 +13,7 @@ export async function GET() {
             );
         }
 
-        const user = await (prisma as any).user.findUnique({
+        const user = await prisma.user.findUnique({
             where: { id: userId },
             select: { id: true, username: true },
         });
