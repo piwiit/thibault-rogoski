@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
         const { username, password } = parsed.data;
 
-        const user = await (prisma as any).user.findUnique({ where: { username } });
+        const user = await prisma.user.findUnique({ where: { username } });
 
         if (!user) {
             return NextResponse.json(
