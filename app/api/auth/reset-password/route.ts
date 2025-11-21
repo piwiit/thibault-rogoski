@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
             const { username } = parsed.data;
 
-            const user = await (prisma as any).user.findUnique({ where: { username } });
+            const user = await prisma.user.findUnique({ where: { username } });
 
             if (!user) {
                 // Pour la sécurité, on ne révèle pas si l'utilisateur existe
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
             const resetTokenExpiry = new Date();
             resetTokenExpiry.setHours(resetTokenExpiry.getHours() + 1); // Token valide 1 heure
 
-            await (prisma as any).user.update({
+            await prisma.user.update({
                 where: { id: user.id },
                 data: {
                     resetToken,
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
 
             const { token, newPassword } = parsed.data;
 
-            const user = await (prisma as any).user.findFirst({
+            const user = await prisma.user.findFirst({
                 where: {
                     resetToken: token,
                     resetTokenExpiry: {
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
 
             const newPasswordHash = await hashPassword(newPassword);
 
-            await (prisma as any).user.update({
+            await prisma.user.update({
                 where: { id: user.id },
                 data: {
                     passwordHash: newPasswordHash,
