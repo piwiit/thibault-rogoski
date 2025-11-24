@@ -76,7 +76,7 @@ export default function ProjectForm({ project, onSuccess, onCancel }: ProjectFor
                 throw new Error(data.error || 'Erreur lors de l\'upload');
             }
 
-            setForm({ ...form, imageUrl: data.imageUrl });
+            setForm((prev) => ({ ...prev, imageUrl: data.imageUrl }));
             setPreview(data.imageUrl);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erreur lors de l\'upload');
@@ -88,7 +88,7 @@ export default function ProjectForm({ project, onSuccess, onCancel }: ProjectFor
     function handleChange(
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
     ) {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     }
 
     async function handleSubmit(e: React.FormEvent) {
@@ -217,7 +217,7 @@ export default function ProjectForm({ project, onSuccess, onCancel }: ProjectFor
                                 type="button"
                                 onClick={() => {
                                     setPreview(null);
-                                    setForm({ ...form, imageUrl: '' });
+                                    setForm((prev) => ({ ...prev, imageUrl: '' }));
                                 }}
                                 className="absolute top-2 right-2 px-3 py-1 text-sm font-semibold text-white bg-red-600 rounded hover:bg-red-700 transition-colors"
                             >
@@ -226,23 +226,9 @@ export default function ProjectForm({ project, onSuccess, onCancel }: ProjectFor
                         </div>
                     )}
 
-                    <div className="text-sm text-gray-500">
-                        <p>Ou utilisez une URL :</p>
-                        <input
-                            type="url"
-                            id="imageUrl"
-                            name="imageUrl"
-                            value={form.imageUrl || ''}
-                            onChange={(e) => {
-                                setForm({ ...form, imageUrl: e.target.value });
-                                if (e.target.value) {
-                                    setPreview(e.target.value);
-                                }
-                            }}
-                            className="w-full mt-2 px-4 py-2 text-gray-900 border-2 border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            placeholder="https://example.com/image.jpg"
-                        />
-                    </div>
+                    <p className="text-sm text-gray-500">
+                        Les images proviennent exclusivement de l’upload ci-dessus. Aucune URL externe n’est acceptée.
+                    </p>
                 </div>
             </div>
 

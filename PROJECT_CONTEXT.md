@@ -21,7 +21,7 @@ L’application devra :
 | **Frontend** | Next.js 15 (App Router) + TypeScript |
 | **Design** | Tailwind CSS + Framer Motion |
 | **Backend** | API Routes Next.js |
-| **Base de données** | MySQL via Prisma ORM |
+| **Base de données** | PostgreSQL via Prisma ORM |
 | **Validation** | Zod |
 | **Déploiement** | Vercel |
 | **IA Dev Assist** | Claude Code (VS Code plugin) |
@@ -41,7 +41,7 @@ L’application devra :
   ```bash
   npx prisma init
   ```
-- [ ] Créer une base MySQL (locale ou Docker)
+- [ ] Créer une base PostgreSQL (locale ou Docker)
 - [ ] Définir les modèles initiaux :
 
 ```prisma
@@ -129,18 +129,21 @@ Utiliser **Claude Code** dans VS Code comme agent IA pour :
 
 ---
 
-### **Phase 5 — Déploiement**
-
-- [ ] Ajouter le fichier `.env` :
+- [ ] Ajouter le fichier `.env` (copier `.env.example`) :
   ```env
-  DATABASE_URL="mysql://user:password@host:port/dbname"
+  DATABASE_URL="postgresql://user:password@host:5432/thibault_landing?schema=public"
+  DIRECT_URL="postgresql://user:password@host:5432/thibault_landing"
+  ADMIN_USER="admin"
+  ADMIN_PASSWORD="motDePasseComplexe@2024"
   ```
+- `ADMIN_PASSWORD` doit contenir au moins 12 caractères (majuscules/minuscules/chiffres/symbole) et n’est utilisé qu’en développement pour provisionner un compte admin.
 - [ ] Vérifier la commande :
   ```bash
   npm run build && npm start
   ```
 - [ ] Déployer sur **Vercel**
-- [ ] Configurer la variable `DATABASE_URL` sur Vercel
+- [ ] Configurer `DATABASE_URL`, `DIRECT_URL`, `ADMIN_USER`, `ADMIN_PASSWORD` sur Vercel (les deux dernières peuvent rester vides si l’on n’initialise pas d’admin en prod)
+- [ ] Initialiser l’admin uniquement en développement via `npm run db:init-admin` ou `POST /api/auth/init` (cet endpoint renvoie 403 en production)
 - [ ] Tester les routes `/api/contact` et `/api/projects`
 - [ ] Vérifier le rendu responsive et le SEO (Lighthouse 90+)
 

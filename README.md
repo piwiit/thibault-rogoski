@@ -6,7 +6,7 @@ Landing page moderne pour un artisan spécialisé en terrassement, VRD (Voirie e
 
 Site vitrine professionnel permettant de :
 - Présenter les services de l'artisan (Terrassement, VRD, Entretien paysager)
-- Afficher les projets réalisés (stockage en base de données MySQL)
+- Afficher les projets réalisés (stockage en base de données PostgreSQL)
 - Gérer les demandes de contact via formulaire
 - Architecture extensible pour futures intégrations (réseaux sociaux, back-office)
 
@@ -17,7 +17,7 @@ Site vitrine professionnel permettant de :
 | **Frontend** | Next.js 15 (App Router) + TypeScript |
 | **Design** | Tailwind CSS + Framer Motion |
 | **Backend** | API Routes Next.js |
-| **Base de données** | MySQL via Prisma ORM |
+| **Base de données** | PostgreSQL via Prisma ORM |
 | **Validation** | Zod |
 | **Déploiement** | Vercel |
 
@@ -65,7 +65,7 @@ thibault-landing/
 ### Prérequis
 
 - Node.js 18+ et npm
-- MySQL (locale ou via Docker)
+- PostgreSQL (local ou via Docker)
 - Git
 
 ### Étapes d'installation
@@ -83,15 +83,15 @@ thibault-landing/
 
 3. **Configurer la base de données**
 
-   Créer un fichier `.env` à la racine du projet :
+   Créer un fichier `.env` à la racine du projet (ou copier `.env.example`) :
    ```env
-   DATABASE_URL="mysql://user:password@host:port/dbname"
+   DATABASE_URL="postgresql://user:password@host:5432/thibault_landing?schema=public"
+   DIRECT_URL="postgresql://user:password@host:5432/thibault_landing"
+   ADMIN_USER="admin"
+   ADMIN_PASSWORD="motDePasseComplexe@2024"
    ```
 
-   Exemple pour MySQL local :
-   ```env
-   DATABASE_URL="mysql://root:password@localhost:3306/thibault_db"
-   ```
+   > `ADMIN_PASSWORD` doit contenir au moins 12 caractères, avec majuscules, minuscules, chiffres et caractères spéciaux. Ces identifiants ne sont utilisés que pour provisionner un compte admin en développement.
 
 4. **Initialiser Prisma et créer les tables**
    ```bash
@@ -119,6 +119,7 @@ thibault-landing/
 | `npx prisma studio` | Ouvre l'interface Prisma Studio pour gérer la base de données |
 | `npx prisma migrate dev` | Crée une nouvelle migration |
 | `npx prisma generate` | Régénère le client Prisma |
+| `npm run db:init-admin` | Crée l’utilisateur admin (développement uniquement) |
 
 ## 🗄️ Base de données
 
@@ -141,10 +142,18 @@ thibault-landing/
 
 ### Gestion de la base de données
 
-Pour visualiser et modifier les données :
-```bash
-npx prisma studio
-```
+- **Provision initial dev** : `npx prisma migrate dev --name init`
+- **Déploiement prod** : `npx prisma migrate deploy`
+- **Création admin (dev uniquement)** :
+  ```bash
+  npm run db:init-admin
+  ```
+  Le script lit `ADMIN_USER/ADMIN_PASSWORD`, vérifie la complexité du mot de passe et refuse de s’exécuter si `NODE_ENV` vaut `production`.
+- **Endpoint d’init** : `POST /api/auth/init` déclenche la même logique mais renvoie `403` en production.
+- **Visualisation** :
+  ```bash
+  npx prisma studio
+  ```
 
 ## 🔌 API Routes
 
@@ -216,7 +225,7 @@ Les animations Framer Motion sont configurées dans :
 
 2. **Déployer sur Vercel**
    - Connecter le repository GitHub/GitLab
-   - Configurer la variable d'environnement `DATABASE_URL` dans les paramètres Vercel
+   - Configurer les variables `DATABASE_URL`, `DIRECT_URL`, `ADMIN_USER`, `ADMIN_PASSWORD`
    - Vercel détectera automatiquement Next.js et déploiera
 
 3. **Post-déploiement**
@@ -224,6 +233,7 @@ Les animations Framer Motion sont configurées dans :
      ```bash
      npx prisma migrate deploy
      ```
+   - Ne pas exécuter `npm run db:init-admin` ni appeler `/api/auth/init` en production (ces outils sont désactivés). Créez les comptes administrateurs via un processus interne sécurisé.
 
 ## 📚 Workflow de développement
 

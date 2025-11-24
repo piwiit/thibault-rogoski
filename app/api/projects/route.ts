@@ -6,7 +6,10 @@ const ProjectSchema = z.object({
   title: z.string().min(1, 'Le titre est requis'),
   category: z.string().min(1, 'La catégorie est requise'),
   description: z.string().min(1, 'La description est requise'),
-  imageUrl: z.string().optional().nullable().or(z.literal('')),
+  imageUrl: z
+    .string()
+    .regex(/^\/images\//, 'Seules les images uploadées sont autorisées')
+    .nullable(),
 });
 
 export async function GET() {
@@ -25,9 +28,10 @@ export async function POST(req: NextRequest) {
     // Normaliser imageUrl : convertir chaîne vide en null
     const normalizedData = {
       ...data,
-      imageUrl: data.imageUrl && typeof data.imageUrl === 'string' && data.imageUrl.trim() !== ''
-        ? data.imageUrl.trim()
-        : null,
+      imageUrl:
+        data.imageUrl && typeof data.imageUrl === 'string' && data.imageUrl.trim() !== ''
+          ? data.imageUrl.trim()
+          : null,
     };
 
     const parsed = ProjectSchema.safeParse(normalizedData);

@@ -6,7 +6,10 @@ const ProjectSchema = z.object({
     title: z.string().min(1, 'Le titre est requis'),
     category: z.string().min(1, 'La catégorie est requise'),
     description: z.string().min(1, 'La description est requise'),
-    imageUrl: z.string().optional().nullable().or(z.literal('')),
+    imageUrl: z
+        .string()
+        .regex(/^\/images\//, 'Seules les images uploadées sont autorisées')
+        .nullable(),
 });
 
 export async function GET(
@@ -45,7 +48,14 @@ export async function PUT(
         }
 
         const data = await req.json();
-        const parsed = ProjectSchema.safeParse(data);
+        const normalizedData = {
+            ...data,
+            imageUrl:
+                data.imageUrl && typeof data.imageUrl === 'string' && data.imageUrl.trim() !== ''
+                    ? data.imageUrl.trim()
+                    : null,
+        };
+        const parsed = ProjectSchema.safeParse(normalizedData);
 
         if (!parsed.success) {
             return NextResponse.json(
@@ -58,7 +68,7 @@ export async function PUT(
             title: parsed.data.title,
             category: parsed.data.category,
             description: parsed.data.description,
-            imageUrl: parsed.data.imageUrl && parsed.data.imageUrl.trim() !== '' ? parsed.data.imageUrl : null,
+            imageUrl: parsed.data.imageUrl,
         };
 
         const project = await prisma.project.update({

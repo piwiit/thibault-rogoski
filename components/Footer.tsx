@@ -16,7 +16,7 @@ export default function Footer() {
             </p>
             <div className="flex space-x-4">
               <a
-                href="#"
+                href="https://www.facebook.com/profile.php?id=61556212468724"
                 className="text-gray-400 transition-colors hover:text-green-400"
                 aria-label="Facebook"
               >

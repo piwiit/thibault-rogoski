@@ -36,18 +36,62 @@ export async function destroySessionCookie(): Promise<string> {
     return 'admin-session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0';
 }
 
-export async function initAdminUser() {
-    const existingUser = await prisma.user.findUnique({ where: { username: 'admin' } });
+const MIN_ADMIN_PASSWORD_LENGTH = 12;
 
-    if (!existingUser) {
-        const passwordHash = await hashPassword('admin');
-        await prisma.user.create({
-            data: {
-                username: 'admin',
-                passwordHash,
-            },
-        });
-        console.log('Admin user created with username: admin, password: admin');
+function validateAdminCredentials() {
+    const username = process.env.ADMIN_USER;
+    const password = process.env.ADMIN_PASSWORD;
+
+    if (!username) {
+        throw new Error('ADMIN_USER doit être défini dans les variables d’environnement.');
     }
+    if (!password) {
+        throw new Error('ADMIN_PASSWORD doit être défini dans les variables d’environnement.');
+    }
+
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasDigit = /[0-9]/.test(password);
+    const hasSymbol = /[^A-Za-z0-9]/.test(password);
+
+    if (
+        password.length < MIN_ADMIN_PASSWORD_LENGTH ||
+        !hasUpper ||
+        !hasLower ||
+        !hasDigit ||
+        !hasSymbol
+    ) {
+        throw new Error(
+            `ADMIN_PASSWORD doit contenir au moins ${MIN_ADMIN_PASSWORD_LENGTH} caractères ` +
+            'et inclure majuscules, minuscules, chiffres et caractères spéciaux.'
+        );
+    }
+
+    return { username, password };
+}
+
+export async function initAdminUser() {
+    const env = process.env.NODE_ENV ?? 'development';
+    if (env !== 'development') {
+        throw new Error('initAdminUser est réservé à l’environnement de développement.');
+    }
+
+    const { username, password } = validateAdminCredentials();
+
+    const existingUser = await prisma.user.findUnique({ where: { username } });
+
+    if (existingUser) {
+        console.log(`L’utilisateur "${username}" existe déjà.`);
+        return;
+    }
+
+    const passwordHash = await hashPassword(password);
+    await prisma.user.create({
+        data: {
+            username,
+            passwordHash,
+        },
+    });
+    console.log(`Utilisateur admin "${username}" créé avec succès en développement.`);
 }
 
