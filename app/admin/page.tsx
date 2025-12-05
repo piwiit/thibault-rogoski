@@ -5,6 +5,7 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import ProjectForm from '../../components/ProjectForm';
 import ChangePasswordForm from '../../components/ChangePasswordForm';
+import SocialLinksForm from '../../components/SocialLinksForm';
 import Link from 'next/link';
 
 interface Project {
@@ -23,6 +24,7 @@ export default function AdminPage() {
     const [error, setError] = useState<string | null>(null);
     const [showForm, setShowForm] = useState(false);
     const [showPasswordForm, setShowPasswordForm] = useState(false);
+    const [showSocialForm, setShowSocialForm] = useState(false);
     const [editingProject, setEditingProject] = useState<Project | null>(null);
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [user, setUser] = useState<{ id: number; username: string } | null>(null);
@@ -117,7 +119,7 @@ export default function AdminPage() {
     }
 
     if (!user) {
-        return null; // Redirection en cours
+        return null;
     }
 
     return (
@@ -132,7 +134,7 @@ export default function AdminPage() {
                                 <p className="text-gray-600">Connecté en tant que <strong>{user.username}</strong></p>
                             </div>
                             <div className="flex gap-3">
-                                {!showForm && !showPasswordForm && (
+                                {!showForm && !showPasswordForm && !showSocialForm && (
                                     <>
                                         <button
                                             onClick={() => {
@@ -142,6 +144,12 @@ export default function AdminPage() {
                                             className="px-6 py-3 text-lg font-semibold text-white transition-colors bg-green-600 rounded-lg shadow-lg hover:bg-green-700"
                                         >
                                             + Nouveau projet
+                                        </button>
+                                        <button
+                                            onClick={() => setShowSocialForm(true)}
+                                            className="px-6 py-3 text-lg font-semibold text-gray-700 transition-colors border-2 border-gray-300 rounded-lg hover:bg-gray-50"
+                                        >
+                                            🔗 Réseaux sociaux
                                         </button>
                                         <button
                                             onClick={() => setShowPasswordForm(true)}
@@ -167,7 +175,20 @@ export default function AdminPage() {
                         </div>
                     )}
 
-                    {showPasswordForm ? (
+                    {showSocialForm ? (
+                        <div className="p-8 bg-white border border-gray-200 shadow-lg rounded-2xl">
+                            <h2 className="mb-6 text-2xl font-bold text-gray-900">
+                                Gérer les réseaux sociaux
+                            </h2>
+                            <SocialLinksForm
+                                onSuccess={() => {
+                                    setShowSocialForm(false);
+                                    alert('Liens des réseaux sociaux mis à jour !');
+                                }}
+                                onCancel={() => setShowSocialForm(false)}
+                            />
+                        </div>
+                    ) : showPasswordForm ? (
                         <div className="p-8 bg-white border border-gray-200 shadow-lg rounded-2xl">
                             <h2 className="mb-6 text-2xl font-bold text-gray-900">
                                 Changer le mot de passe
@@ -292,4 +313,3 @@ export default function AdminPage() {
         </div>
     );
 }
-
