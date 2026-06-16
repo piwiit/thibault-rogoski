@@ -5,7 +5,7 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import ProjectForm from '../../components/ProjectForm';
 import ChangePasswordForm from '../../components/ChangePasswordForm';
-import SocialLinksForm from '../../components/SocialLinksForm';
+import LandingPageForm from '../../components/LandingPageForm';
 import Link from 'next/link';
 
 interface Project {
@@ -15,6 +15,7 @@ interface Project {
     description: string;
     imageUrl: string | null;
     createdAt: string;
+    facebookPostId?: string | null;
 }
 
 export default function AdminPage() {
@@ -24,7 +25,7 @@ export default function AdminPage() {
     const [error, setError] = useState<string | null>(null);
     const [showForm, setShowForm] = useState(false);
     const [showPasswordForm, setShowPasswordForm] = useState(false);
-    const [showSocialForm, setShowSocialForm] = useState(false);
+    const [showLandingForm, setShowLandingForm] = useState(false);
     const [editingProject, setEditingProject] = useState<Project | null>(null);
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [user, setUser] = useState<{ id: number; username: string } | null>(null);
@@ -74,6 +75,16 @@ export default function AdminPage() {
         try {
             const res = await fetch(`/api/projects/${id}`, { method: 'DELETE' });
             if (!res.ok) throw new Error('Erreur lors de la suppression');
+
+            const data = await res.json();
+            if (data.facebook?.error) {
+                alert(
+                    `Projet supprimé du site, mais la suppression Facebook a échoué :\n\n${data.facebook.error}`
+                );
+            } else if (data.facebook?.deleted) {
+                alert('Projet supprimé du site et de Facebook.');
+            }
+
             await fetchProjects();
         } catch (err) {
             alert(err instanceof Error ? err.message : 'Erreur lors de la suppression');
@@ -134,7 +145,7 @@ export default function AdminPage() {
                                 <p className="text-gray-600">Connecté en tant que <strong>{user.username}</strong></p>
                             </div>
                             <div className="flex gap-3">
-                                {!showForm && !showPasswordForm && !showSocialForm && (
+                                {!showForm && !showPasswordForm && !showLandingForm && (
                                     <>
                                         <button
                                             onClick={() => {
@@ -146,10 +157,10 @@ export default function AdminPage() {
                                             + Nouveau projet
                                         </button>
                                         <button
-                                            onClick={() => setShowSocialForm(true)}
+                                            onClick={() => setShowLandingForm(true)}
                                             className="px-6 py-3 text-lg font-semibold text-gray-700 transition-colors border-2 border-gray-300 rounded-lg hover:bg-gray-50"
                                         >
-                                            🔗 Réseaux sociaux
+                                            Page d&apos;accueil
                                         </button>
                                         <button
                                             onClick={() => setShowPasswordForm(true)}
@@ -175,17 +186,17 @@ export default function AdminPage() {
                         </div>
                     )}
 
-                    {showSocialForm ? (
+                    {showLandingForm ? (
                         <div className="p-8 bg-white border border-gray-200 shadow-lg rounded-2xl">
                             <h2 className="mb-6 text-2xl font-bold text-gray-900">
-                                Gérer les réseaux sociaux
+                                Modifier la page d&apos;accueil
                             </h2>
-                            <SocialLinksForm
+                            <LandingPageForm
                                 onSuccess={() => {
-                                    setShowSocialForm(false);
-                                    alert('Liens des réseaux sociaux mis à jour !');
+                                    setShowLandingForm(false);
+                                    alert('Page d\'accueil mise à jour !');
                                 }}
-                                onCancel={() => setShowSocialForm(false)}
+                                onCancel={() => setShowLandingForm(false)}
                             />
                         </div>
                     ) : showPasswordForm ? (

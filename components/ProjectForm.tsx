@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Toggle from './Toggle';
 
 interface Project {
     id?: number;
@@ -8,6 +9,7 @@ interface Project {
     category: string;
     description: string;
     imageUrl?: string | null;
+    facebookPostId?: string | null;
 }
 
 interface ProjectFormProps {
@@ -17,11 +19,12 @@ interface ProjectFormProps {
 }
 
 export default function ProjectForm({ project, onSuccess, onCancel }: ProjectFormProps) {
-    const [form, setForm] = useState<Project>({
+    const [form, setForm] = useState<Project & { publishToSocial: boolean }>({
         title: '',
         category: 'Terrassement',
         description: '',
         imageUrl: '',
+        publishToSocial: true,
     });
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -35,6 +38,7 @@ export default function ProjectForm({ project, onSuccess, onCancel }: ProjectFor
                 category: project.category,
                 description: project.description,
                 imageUrl: project.imageUrl || '',
+                publishToSocial: !!project.facebookPostId,
             });
             if (project.imageUrl) {
                 setPreview(project.imageUrl);
@@ -108,6 +112,7 @@ export default function ProjectForm({ project, onSuccess, onCancel }: ProjectFor
                 category: form.category,
                 description: form.description.trim(),
                 imageUrl: form.imageUrl && form.imageUrl.trim() !== '' ? form.imageUrl.trim() : null,
+                publishToSocial: form.publishToSocial,
             };
 
             const res = await fetch(url, {
@@ -122,6 +127,21 @@ export default function ProjectForm({ project, onSuccess, onCancel }: ProjectFor
                     ? `${data.error}: ${JSON.stringify(data.details)}`
                     : data.error || 'Erreur lors de l\'enregistrement';
                 throw new Error(errorMessage);
+            }
+
+            const data = await res.json();
+            if (data.facebook) {
+                if (!data.facebook.published && data.facebook.error) {
+                    alert(
+                        `Projet enregistré, mais la synchronisation Facebook a échoué :\n\n${data.facebook.error}`
+                    );
+                } else if (data.facebook.published && data.facebook.error) {
+                    alert(`Projet enregistré.\n\nAttention : ${data.facebook.error}`);
+                } else if (data.facebook.reposted) {
+                    alert('Projet mis à jour : le post Facebook a été republié.');
+                } else if (data.facebook.published) {
+                    alert('Projet enregistré et publié sur Facebook.');
+                }
             }
 
             onSuccess();
@@ -231,6 +251,13 @@ export default function ProjectForm({ project, onSuccess, onCancel }: ProjectFor
                     </p>
                 </div>
             </div>
+
+                        <Toggle
+                label="Publier sur les réseaux sociaux"
+                description="Le projet sera automatiquement partagé sur Facebook et Instagram"
+                checked={form.publishToSocial}
+                onChange={(checked) => setForm(prev => ({ ...prev, publishToSocial: checked }))}
+            />
 
             {error && (
                 <div className="px-4 py-3 text-sm font-medium text-red-800 border border-red-200 rounded-lg bg-red-50">

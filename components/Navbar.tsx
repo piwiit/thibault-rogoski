@@ -2,8 +2,15 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { LandingContent } from "@/lib/landing";
+import { useLandingContent } from "@/hooks/useLandingContent";
 
-export default function Navbar() {
+interface NavbarProps {
+  landingContent?: LandingContent;
+}
+
+export default function Navbar({ landingContent }: NavbarProps) {
+  const content = useLandingContent(landingContent);
   const [scrolled, setScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -28,13 +35,12 @@ export default function Navbar() {
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="text-2xl font-bold text-green-600">TR</span>
+              <span className="text-2xl font-bold text-green-600">{content.site.brandInitials}</span>
               <span className="hidden text-xl font-semibold text-gray-900 sm:block">
-                Thibault Rogoski
+                {content.site.brandName}
               </span>
             </Link>
 
-            {/* Desktop Menu */}
             <ul className="items-center hidden space-x-8 md:flex">
               <li>
                 <Link
@@ -62,10 +68,10 @@ export default function Navbar() {
               </li>
             </ul>
 
-            {/* Mobile Menu Button */}
             <button
               className="p-2 text-gray-700 md:hidden"
               onClick={() => setIsOpen((prev) => !prev)}
+              aria-label="Menu"
             >
               <svg
                 className="w-6 h-6"
@@ -83,7 +89,6 @@ export default function Navbar() {
         </div>
       </motion.nav>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -102,7 +107,6 @@ export default function Navbar() {
                   Accueil
                 </Link>
               </li>
-
               <li>
                 <Link
                   href="/projets"
@@ -112,7 +116,6 @@ export default function Navbar() {
                   Projets
                 </Link>
               </li>
-
               <li>
                 <Link
                   href="/contact"

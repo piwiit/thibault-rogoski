@@ -98,10 +98,11 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                                 >
                                     <Image
                                         src={project.imageUrl}
-                                        alt={project.title}
+                                        alt={`${project.title} - ${project.category} - Thibault Rogoski`}
                                         fill
+                                        priority
                                         className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                        sizes="100vw"
+                                        sizes="(max-width: 768px) 100vw, 896px"
                                     />
                                     <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 bg-black/0 group-hover:bg-black/30">
                                         <span className="px-4 py-2 text-sm font-semibold text-white transition-opacity duration-300 bg-green-600 rounded-lg opacity-0 group-hover:opacity-100">

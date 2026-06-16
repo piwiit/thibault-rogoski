@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { buildProjectFacebookMessage, postToFacebook, type FacebookPostResult } from '@/lib/facebook';
 
 const ProjectSchema = z.object({
   title: z.string().min(1, 'Le titre est requis'),
@@ -10,6 +11,7 @@ const ProjectSchema = z.object({
     .string()
     .regex(/^\/images\//, 'Seules les images uploadées sont autorisées')
     .nullable(),
+  publishToSocial: z.boolean().optional(),
 });
 
 export async function GET() {
@@ -17,7 +19,11 @@ export async function GET() {
     const projects = await prisma.project.findMany({ orderBy: { createdAt: 'desc' } });
     return NextResponse.json(projects);
   } catch (e) {
-    return NextResponse.json({ error: 'Server error', details: e instanceof Error ? e.message : e }, { status: 500 });
+    console.error('GET /api/projects error:', e);
+    return NextResponse.json(
+      { error: 'Server error', details: e instanceof Error ? e.message : e },
+      { status: 500 }
+    );
   }
 }
 
@@ -25,7 +31,6 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
 
-    // Normaliser imageUrl : convertir chaîne vide en null
     const normalizedData = {
       ...data,
       imageUrl:
@@ -50,15 +55,43 @@ export async function POST(req: NextRequest) {
       imageUrl: parsed.data.imageUrl,
     };
 
-    const project = await prisma.project.create({ data: projectData });
-    return NextResponse.json({ success: true, project }, { status: 201 });
+    let project = await prisma.project.create({ data: projectData });
+
+    let facebook: FacebookPostResult = { success: false };
+    if (data.publishToSocial !== false) {
+      const message = buildProjectFacebookMessage(
+        project.title,
+        project.category,
+        project.description
+      );
+      facebook = await postToFacebook(message, project.imageUrl);
+    }
+
+    if (facebook.success && facebook.postId) {
+      project = await prisma.project.update({
+        where: { id: project.id },
+        data: { facebookPostId: facebook.postId },
+      });
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        project,
+        facebook: {
+          published: facebook.success,
+          postId: facebook.postId ?? null,
+          error: facebook.error ?? null,
+        },
+      },
+      { status: 201 }
+    );
   } catch (e) {
     console.error('Error creating project:', e);
     return NextResponse.json(
       {
         error: 'Server error',
         details: e instanceof Error ? e.message : String(e),
-        stack: process.env.NODE_ENV === 'development' && e instanceof Error ? e.stack : undefined
       },
       { status: 500 }
     );

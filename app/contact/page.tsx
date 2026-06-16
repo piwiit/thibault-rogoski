@@ -1,8 +1,18 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import ContactForm from '../../components/ContactForm';
 import Link from 'next/link';
+import { buildPageMetadata } from '@/lib/seo';
+
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Contact & devis gratuit',
+  description:
+    'Contactez Thibault Rogoski pour un devis gratuit en terrassement, VRD ou entretien paysager. Réponse rapide et sans engagement.',
+  path: '/contact',
+  keywords: ['devis terrassement', 'devis VRD', 'contact paysagiste', 'devis gratuit'],
+});
 
 export default function ContactPage() {
   return (

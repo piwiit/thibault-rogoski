@@ -15,6 +15,7 @@ model Project {
   description String
   imageUrl    String?
   createdAt   DateTime @default(now())
+  facebookPostId String?
 }
 
 model Contact {

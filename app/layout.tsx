@@ -1,6 +1,11 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import {
+  buildPageMetadata,
+  DEFAULT_KEYWORDS,
+  SITE_NAME,
+} from "@/lib/seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,26 +17,29 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const defaultDescription =
+  "Artisan professionnel spécialisé en terrassement, VRD (Voirie et Réseaux Divers) et entretien paysager. Devis gratuit et intervention rapide.";
+
 export const metadata: Metadata = {
-  title: "Thibault Rogoski - Terrassement, VRD, Entretien Paysager",
-  description: "Artisan du BTP spécialisé en terrassement, VRD (Voirie et Réseaux Divers) et entretien paysager. Expert en aménagement extérieur.",
-  keywords: ["terrassement", "VRD", "entretien paysager", "BTP", "aménagement extérieur", "artisan"],
-  authors: [{ name: "Thibault Rogoski" }],
-  openGraph: {
-    title: "Thibault Rogoski - Terrassement, VRD, Entretien Paysager",
-    description: "Artisan du BTP spécialisé en terrassement, VRD et entretien paysager. Expert en aménagement extérieur.",
-    type: "website",
-    locale: "fr_FR",
+  ...buildPageMetadata({
+    title: `${SITE_NAME} - Terrassement, VRD, Entretien Paysager`,
+    description: defaultDescription,
+    path: "/",
+  }),
+  keywords: DEFAULT_KEYWORDS,
+  applicationName: SITE_NAME,
+  category: "construction",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Thibault Rogoski - Terrassement, VRD, Entretien Paysager",
-    description: "Artisan du BTP spécialisé en terrassement, VRD et entretien paysager.",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#16a34a",
 };
 
 export default function RootLayout({

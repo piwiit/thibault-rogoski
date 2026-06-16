@@ -1,8 +1,8 @@
-"use client";
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 
 interface ProjectCardProps {
   id: number;
@@ -10,74 +10,60 @@ interface ProjectCardProps {
   category: string;
   description: string;
   imageUrl?: string | null;
-  index?: number;
 }
 
-export default function ProjectCard({ id, title, category, description, imageUrl, index = 0 }: ProjectCardProps) {
-  const categoryColors: Record<string, string> = {
-    'Terrassement': 'bg-blue-100 text-blue-800',
-    'VRD': 'bg-orange-100 text-orange-800',
-    'Entretien paysager': 'bg-green-100 text-green-800',
-  };
-
-  const categoryColor = categoryColors[category] || 'bg-gray-100 text-gray-800';
+export default function ProjectCard({
+  id,
+  title,
+  category,
+  description,
+  imageUrl,
+}: ProjectCardProps) {
+  const [imageError, setImageError] = useState(false);
+  const showImage = Boolean(imageUrl) && !imageError;
 
   return (
-    <Link href={`/projets/${id}`} className="block h-full">
-      <motion.article
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.5, delay: index * 0.1 }}
-        whileHover={{ y: -8 }}
-        className="flex h-full flex-col overflow-hidden transition-shadow duration-300 bg-white border border-gray-200 shadow-lg rounded-xl hover:shadow-2xl"
-      >
-        {imageUrl ? (
-          <div className="relative w-full h-48 overflow-hidden bg-gray-200">
-            <Image
-              src={imageUrl}
-              alt={title}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
-          </div>
+    <Link
+      href={`/projets/${id}`}
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg transition-shadow duration-300 hover:shadow-2xl"
+    >
+      <div className="relative aspect-[4/3] w-full shrink-0 bg-gradient-to-br from-green-100 to-emerald-100">
+        {showImage ? (
+          <Image
+            src={imageUrl!}
+            alt={title}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            onError={() => setImageError(true)}
+          />
         ) : (
-          <div className="flex items-center justify-center w-full h-48 bg-gradient-to-br from-green-100 to-emerald-100">
-            <span className="text-6xl">🏗️</span>
-          </div>
+          <div className="flex h-full w-full items-center justify-center text-6xl">🏗️</div>
         )}
-        <div className="flex flex-col flex-1 p-6">
-          <span className={`inline-block px-3 py-1 mb-3 text-xs font-semibold rounded-full ${categoryColor}`}>
-            {category}
-          </span>
-          <h3
-            className="mb-2 text-xl font-bold text-gray-900"
-            style={{
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}
+      </div>
+
+      <div className="flex min-w-0 flex-1 flex-col p-6">
+        <span className="mb-3 inline-block self-start rounded-full bg-green-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-green-700">
+          {category}
+        </span>
+        <h3 className="mb-3 line-clamp-2 text-xl font-bold text-gray-900">{title}</h3>
+        <p className="line-clamp-4 flex-1 break-words text-sm leading-relaxed text-gray-600 whitespace-pre-line">
+          {description}
+        </p>
+        <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-green-600 group-hover:text-green-700">
+          Voir le projet
+          <svg
+            width="16"
+            height="16"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            aria-hidden="true"
           >
-            {title}
-          </h3>
-          <p
-            className="text-gray-600"
-            style={{
-              display: '-webkit-box',
-              WebkitLineClamp: 4,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}
-          >
-            {description}
-          </p>
-          <span className="mt-4 text-sm font-semibold text-green-600">
-            Voir le projet →
-          </span>
-        </div>
-      </motion.article>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </span>
+      </div>
     </Link>
   );
 }
