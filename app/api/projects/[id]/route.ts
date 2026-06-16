@@ -1,7 +1,8 @@
-import { type FacebookPostResult, NextRequest, NextResponse } from 'next/server';
-import { type FacebookPostResult, prisma } from '@/lib/prisma';
-import { type FacebookPostResult, z } from 'zod';
-import { type FacebookPostResult,
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { z } from 'zod';
+import {
+  type FacebookPostResult,
   buildProjectFacebookMessage,
   deleteFacebookPost,
   syncProjectToFacebook,
