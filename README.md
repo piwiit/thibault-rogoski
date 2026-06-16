@@ -88,7 +88,7 @@ thibault-landing/
    DATABASE_URL="postgresql://user:password@host:5432/thibault_landing?schema=public"
    DIRECT_URL="postgresql://user:password@host:5432/thibault_landing"
    ADMIN_USER="admin"
-   ADMIN_PASSWORD="motDePasseComplexe@2024"
+   ADMIN_PASSWORD="#################"
    ```
 
    > `ADMIN_PASSWORD` doit contenir au moins 12 caractères, avec majuscules, minuscules, chiffres et caractères spéciaux. Ces identifiants ne sont utilisés que pour provisionner un compte admin en développement.
