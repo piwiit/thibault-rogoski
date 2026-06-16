@@ -5,15 +5,16 @@ export const SITE_NAME = 'Thibault Rogoski';
 export const DEFAULT_OG_IMAGE = '/images/1765122244071_518184455_122245037084207082_2057352680253011563_n__1_.jpg';
 
 export const DEFAULT_KEYWORDS = [
-  'terrassement',
-  'VRD',
-  'voirie et réseaux divers',
-  'entretien paysager',
-  'aménagement extérieur',
-  'artisan BTP',
-  'paysagiste',
-  'devis gratuit',
+  'terrassement Longeves',
+  'jardinier Longeves',
+  'terrassement 17',
+  'paysagiste Longeves',
+  'aménagement extérieur Longeves',
+  'entretien paysager 17',
+  'VRD Longeves',
+  'travaux terrassement Charente-Maritime',
   'Thibault Rogoski',
+  'devis terrassement gratuit',
 ];
 
 export function getSiteUrl(): string {
