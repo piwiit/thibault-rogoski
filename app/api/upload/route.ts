@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
-import { existsSync } from 'fs';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
     try {
@@ -30,27 +28,30 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Créer le dossier images s'il n'existe pas
-        const uploadDir = join(process.cwd(), 'public', 'images');
-        if (!existsSync(uploadDir)) {
-            await mkdir(uploadDir, { recursive: true });
-        }
-
         // Générer un nom de fichier unique
         const timestamp = Date.now();
         const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
         const filename = `${timestamp}_${sanitizedName}`;
-        const filepath = join(uploadDir, filename);
 
-        // Convertir le fichier en buffer et l'écrire
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-        await writeFile(filepath, buffer);
+        // Upload vers Supabase
+        const { data, error } = await supabase.storage
+            .from('Image')
+            .upload(filename, file, {
+                contentType: file.type,
+                upsert: true,
+            });
 
-        // Retourner l'URL de l'image
-        const imageUrl = `/images/${filename}`;
+        if (error) {
+            console.error('Supabase upload error:', error);
+            return NextResponse.json({ error: 'Erreur lors de l\'upload sur Supabase' }, { status: 500 });
+        }
 
-        return NextResponse.json({ success: true, imageUrl });
+        // Obtenir l'URL publique
+        const { data: publicUrlData } = supabase.storage
+            .from('Image')
+            .getPublicUrl(filename);
+
+        return NextResponse.json({ success: true, imageUrl: publicUrlData.publicUrl });
     } catch (e) {
         console.error('Upload error:', e);
         return NextResponse.json(
