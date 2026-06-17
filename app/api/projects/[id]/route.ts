@@ -15,7 +15,7 @@ const ProjectSchema = z.object({
     description: z.string().min(1, 'La description est requise'),
     imageUrl: z
         .string()
-        .regex(/^\/images\//, 'Seules les images uploadées sont autorisées')
+        .regex(/^(\/images\/|https:\/\/.*\.supabase\.co\/)/, 'Seules les images uploadées sont autorisées')
         .nullable(),
     publishToSocial: z.boolean().optional(),
 });
