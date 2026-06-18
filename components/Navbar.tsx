@@ -141,7 +141,7 @@ export default function Navbar({ landingContent }: NavbarProps) {
                 <Link
                   href="/contact"
                   onClick={() => setIsOpen(false)}
-                  className={`block px-4 py-2 font-semibold text-center text-white transition-colors rounded-lg ${isActive('/contact') ? 'bg-green-700' : 'bg-green-600 hover:bg-green-700'}`}
+                  className={`block font-medium transition-colors ${isActive('/contact') ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`}
                 >
                   Contact
                 </Link>
