@@ -495,11 +495,11 @@ export default function LandingPageForm({ onSuccess, onCancel }: LandingPageForm
         </div>
       )}
 
-      <div className="flex gap-4 pt-4 border-t border-gray-200">
+      <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200">
         <button
           type="submit"
           disabled={saving}
-          className="flex-1 rounded-lg bg-green-600 px-6 py-3 text-lg font-semibold text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full sm:flex-1 rounded-lg bg-green-600 px-6 py-3 text-lg font-semibold text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 order-1 sm:order-none"
         >
           {saving ? 'Sauvegarde...' : 'Enregistrer la page d\'accueil'}
         </button>
@@ -507,7 +507,7 @@ export default function LandingPageForm({ onSuccess, onCancel }: LandingPageForm
           type="button"
           onClick={onCancel}
           disabled={saving}
-          className="flex-1 rounded-lg border-2 border-gray-300 px-6 py-3 text-lg font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+          className="w-full sm:flex-1 rounded-lg border-2 border-gray-300 px-6 py-3 text-lg font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
         >
           Annuler
         </button>

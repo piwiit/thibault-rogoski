@@ -5,6 +5,7 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import ProjectForm from '../../components/ProjectForm';
 import ChangePasswordForm from '../../components/ChangePasswordForm';
+import UpdateEmailForm from '../../components/UpdateEmailForm';
 import LandingPageForm from '../../components/LandingPageForm';
 import Link from 'next/link';
 
@@ -25,10 +26,11 @@ export default function AdminPage() {
     const [error, setError] = useState<string | null>(null);
     const [showForm, setShowForm] = useState(false);
     const [showPasswordForm, setShowPasswordForm] = useState(false);
+    const [showEmailForm, setShowEmailForm] = useState(false);
     const [showLandingForm, setShowLandingForm] = useState(false);
     const [editingProject, setEditingProject] = useState<Project | null>(null);
     const [deletingId, setDeletingId] = useState<number | null>(null);
-    const [user, setUser] = useState<{ id: number; username: string } | null>(null);
+    const [user, setUser] = useState<{ id: number; username: string; email?: string } | null>(null);
     const [authLoading, setAuthLoading] = useState(true);
 
     useEffect(() => {
@@ -139,41 +141,50 @@ export default function AdminPage() {
             <main className="pt-24 pb-20">
                 <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="mb-8">
-                        <div className="flex items-center justify-between mb-4">
+                        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between mb-4">
                             <div>
-                                <h1 className="mb-2 text-4xl font-bold text-gray-900">Administration</h1>
-                                <p className="text-gray-600">Connecté en tant que <strong>{user.username}</strong></p>
+                                <h1 className="mb-2 text-3xl md:text-4xl font-bold text-gray-900">Administration</h1>
+                                <p className="text-gray-600">Connecté en tant que <strong>{user.username}</strong> {user.email && <span className="hidden sm:inline">({user.email})</span>}</p>
+                                {user.email && <p className="sm:hidden text-sm text-gray-500">{user.email}</p>}
                             </div>
-                            <div className="flex gap-3">
-                                {!showForm && !showPasswordForm && !showLandingForm && (
+                            <div className="flex flex-wrap gap-2 md:gap-3">
+                                {!showForm && !showPasswordForm && !showEmailForm && !showLandingForm && (
                                     <>
                                         <button
                                             onClick={() => {
                                                 setEditingProject(null);
                                                 setShowForm(true);
                                             }}
-                                            className="px-6 py-3 text-lg font-semibold text-white transition-colors bg-green-600 rounded-lg shadow-lg hover:bg-green-700"
+                                            className="flex-1 md:flex-none px-4 md:px-6 py-3 text-sm md:text-lg font-semibold text-white transition-colors bg-green-600 rounded-lg shadow-lg hover:bg-green-700 text-center"
                                         >
                                             + Nouveau projet
                                         </button>
                                         <button
                                             onClick={() => setShowLandingForm(true)}
-                                            className="px-6 py-3 text-lg font-semibold text-gray-700 transition-colors border-2 border-gray-300 rounded-lg hover:bg-gray-50"
+                                            className="flex-1 md:flex-none px-4 md:px-6 py-3 text-sm md:text-lg font-semibold text-gray-700 transition-colors border-2 border-gray-300 rounded-lg hover:bg-gray-50 text-center"
                                         >
-                                            Page d&apos;accueil
+                                            Accueil
                                         </button>
-                                        <button
-                                            onClick={() => setShowPasswordForm(true)}
-                                            className="px-6 py-3 text-lg font-semibold text-gray-700 transition-colors border-2 border-gray-300 rounded-lg hover:bg-gray-50"
-                                        >
-                                            Changer le mot de passe
-                                        </button>
-                                        <button
-                                            onClick={handleLogout}
-                                            className="px-6 py-3 text-lg font-semibold text-red-600 transition-colors border-2 border-red-300 rounded-lg hover:bg-red-50"
-                                        >
-                                            Déconnexion
-                                        </button>
+                                        <div className="w-full sm:w-auto flex gap-2 md:gap-3">
+                                            <button
+                                                onClick={() => setShowEmailForm(true)}
+                                                className="flex-1 md:flex-none px-4 md:px-6 py-3 text-sm md:text-lg font-semibold text-gray-700 transition-colors border-2 border-gray-300 rounded-lg hover:bg-gray-50 text-center"
+                                            >
+                                                Email
+                                            </button>
+                                            <button
+                                                onClick={() => setShowPasswordForm(true)}
+                                                className="flex-1 md:flex-none px-4 md:px-6 py-3 text-sm md:text-lg font-semibold text-gray-700 transition-colors border-2 border-gray-300 rounded-lg hover:bg-gray-50 text-center"
+                                            >
+                                                Pass
+                                            </button>
+                                            <button
+                                                onClick={handleLogout}
+                                                className="flex-1 md:flex-none px-4 md:px-6 py-3 text-sm md:text-lg font-semibold text-red-600 transition-colors border-2 border-red-300 rounded-lg hover:bg-red-50 text-center"
+                                            >
+                                                Off
+                                            </button>
+                                        </div>
                                     </>
                                 )}
                             </div>
@@ -187,7 +198,7 @@ export default function AdminPage() {
                     )}
 
                     {showLandingForm ? (
-                        <div className="p-8 bg-white border border-gray-200 shadow-lg rounded-2xl">
+                        <div className="p-4 md:p-8 bg-white border border-gray-200 shadow-lg rounded-2xl">
                             <h2 className="mb-6 text-2xl font-bold text-gray-900">
                                 Modifier la page d&apos;accueil
                             </h2>
@@ -199,10 +210,24 @@ export default function AdminPage() {
                                 onCancel={() => setShowLandingForm(false)}
                             />
                         </div>
-                    ) : showPasswordForm ? (
-                        <div className="p-8 bg-white border border-gray-200 shadow-lg rounded-2xl">
+                    ) : showEmailForm ? (
+                        <div className="p-4 md:p-8 bg-white border border-gray-200 shadow-lg rounded-2xl">
                             <h2 className="mb-6 text-2xl font-bold text-gray-900">
-                                Changer le mot de passe
+                                Email administrateur
+                            </h2>
+                            <UpdateEmailForm
+                                initialEmail={user.email || ''}
+                                onSuccess={(newEmail) => {
+                                    setUser({ ...user, email: newEmail });
+                                    setShowEmailForm(false);
+                                }}
+                                onCancel={() => setShowEmailForm(false)}
+                            />
+                        </div>
+                    ) : showPasswordForm ? (
+                        <div className="p-4 md:p-8 bg-white border border-gray-200 shadow-lg rounded-2xl">
+                            <h2 className="mb-6 text-2xl font-bold text-gray-900">
+                                Mot de passe
                             </h2>
                             <ChangePasswordForm
                                 onSuccess={() => {
@@ -213,7 +238,7 @@ export default function AdminPage() {
                             />
                         </div>
                     ) : showForm ? (
-                        <div className="p-8 bg-white border border-gray-200 shadow-lg rounded-2xl">
+                        <div className="p-4 md:p-8 bg-white border border-gray-200 shadow-lg rounded-2xl">
                             <h2 className="mb-6 text-2xl font-bold text-gray-900">
                                 {editingProject ? 'Modifier le projet' : 'Nouveau projet'}
                             </h2>
@@ -237,63 +262,33 @@ export default function AdminPage() {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="overflow-hidden bg-white border border-gray-200 shadow-lg rounded-2xl">
-                                    <div className="overflow-x-auto">
+                                <div className="space-y-4">
+                                    {/* Version Desktop: Table */}
+                                    <div className="hidden lg:block overflow-hidden bg-white border border-gray-200 shadow-lg rounded-2xl">
                                         <table className="w-full">
                                             <thead className="bg-gray-50">
                                                 <tr>
-                                                    <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left text-gray-700 uppercase">
-                                                        Titre
-                                                    </th>
-                                                    <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left text-gray-700 uppercase">
-                                                        Catégorie
-                                                    </th>
-                                                    <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left text-gray-700 uppercase">
-                                                        Description
-                                                    </th>
-                                                    <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left text-gray-700 uppercase">
-                                                        Date
-                                                    </th>
-                                                    <th className="px-6 py-4 text-xs font-semibold tracking-wider text-right text-gray-700 uppercase">
-                                                        Actions
-                                                    </th>
+                                                    <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left text-gray-700 uppercase">Titre</th>
+                                                    <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left text-gray-700 uppercase">Catégorie</th>
+                                                    <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left text-gray-700 uppercase">Description</th>
+                                                    <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left text-gray-700 uppercase">Date</th>
+                                                    <th className="px-6 py-4 text-xs font-semibold tracking-wider text-right text-gray-700 uppercase">Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="bg-white divide-y divide-gray-200">
                                                 {projects.map((project) => (
                                                     <tr key={project.id} className="hover:bg-gray-50">
+                                                        <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">{project.title}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap">
-                                                            <div className="text-sm font-semibold text-gray-900">
-                                                                {project.title}
-                                                            </div>
+                                                            <span className="inline-flex px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">{project.category}</span>
                                                         </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap">
-                                                            <span className="inline-flex px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
-                                                                {project.category}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-6 py-4">
-                                                            <div className="max-w-md text-sm text-gray-600 truncate">
-                                                                {project.description}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                                            {new Date(project.createdAt).toLocaleDateString('fr-FR')}
-                                                        </td>
+                                                        <td className="px-6 py-4 max-w-xs truncate text-sm text-gray-600">{project.description}</td>
+                                                        <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">{new Date(project.createdAt).toLocaleDateString('fr-FR')}</td>
                                                         <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                                                             <div className="flex items-center justify-end gap-2">
-                                                                <button
-                                                                    onClick={() => handleEdit(project)}
-                                                                    className="px-4 py-2 text-green-600 transition-colors rounded-lg hover:text-green-800 hover:bg-green-50"
-                                                                >
-                                                                    Modifier
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => handleDelete(project.id)}
-                                                                    disabled={deletingId === project.id}
-                                                                    className="px-4 py-2 text-red-600 transition-colors rounded-lg hover:text-red-800 hover:bg-red-50 disabled:opacity-50"
-                                                                >
-                                                                    {deletingId === project.id ? 'Suppression...' : 'Supprimer'}
+                                                                <button onClick={() => handleEdit(project)} className="px-4 py-2 text-green-600 hover:bg-green-50 rounded-lg">Modifier</button>
+                                                                <button onClick={() => handleDelete(project.id)} disabled={deletingId === project.id} className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50">
+                                                                    {deletingId === project.id ? '...' : 'Supprimer'}
                                                                 </button>
                                                             </div>
                                                         </td>
@@ -301,6 +296,28 @@ export default function AdminPage() {
                                                 ))}
                                             </tbody>
                                         </table>
+                                    </div>
+
+                                    {/* Version Mobile: Cards */}
+                                    <div className="lg:hidden space-y-4">
+                                        {projects.map((project) => (
+                                            <div key={project.id} className="bg-white border border-gray-200 shadow-md rounded-xl p-4 space-y-3">
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <h3 className="font-bold text-gray-900">{project.title}</h3>
+                                                        <span className="inline-block mt-1 px-2 py-0.5 text-xs font-semibold text-green-800 bg-green-100 rounded-full">{project.category}</span>
+                                                    </div>
+                                                    <span className="text-xs text-gray-500">{new Date(project.createdAt).toLocaleDateString('fr-FR')}</span>
+                                                </div>
+                                                <p className="text-sm text-gray-600 line-clamp-2">{project.description}</p>
+                                                <div className="flex gap-2 pt-2 border-t border-gray-100">
+                                                    <button onClick={() => handleEdit(project)} className="flex-1 py-2 text-sm font-semibold text-green-600 bg-green-50 rounded-lg">Modifier</button>
+                                                    <button onClick={() => handleDelete(project.id)} disabled={deletingId === project.id} className="flex-1 py-2 text-sm font-semibold text-red-600 bg-red-50 rounded-lg disabled:opacity-50">
+                                                        {deletingId === project.id ? 'Suppr...' : 'Supprimer'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             )}

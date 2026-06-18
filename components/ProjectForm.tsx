@@ -265,11 +265,11 @@ export default function ProjectForm({ project, onSuccess, onCancel }: ProjectFor
                 </div>
             )}
 
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
                 <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 px-6 py-3 text-lg font-semibold text-white transition-all duration-300 bg-green-600 rounded-lg shadow-lg hover:bg-green-700 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:flex-1 px-6 py-3 text-lg font-semibold text-white transition-all duration-300 bg-green-600 rounded-lg shadow-lg hover:bg-green-700 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-none"
                 >
                     {loading ? (
                         <span className="flex items-center justify-center">
