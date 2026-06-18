@@ -8,7 +8,7 @@ import Link from 'next/link';
 export default function ForgotPasswordPage() {
     const router = useRouter();
     const [step, setStep] = useState<'request' | 'reset'>('request');
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [token, setToken] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
             const res = await fetch('/api/auth/reset-password', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username }),
+                body: JSON.stringify({ email }),
             });
 
             const data = await res.json();
@@ -93,23 +93,23 @@ export default function ForgotPasswordPage() {
                         {step === 'request' ? (
                             <>
                                 <p className="mb-8 text-center text-gray-600">
-                                    Entrez votre nom d&apos;utilisateur pour recevoir un lien de réinitialisation
+                                    Entrez votre adresse email pour recevoir un lien de réinitialisation
                                 </p>
 
                                 <form onSubmit={handleRequestReset} className="space-y-6">
                                     <div>
-                                        <label htmlFor="username" className="block mb-2 text-sm font-semibold text-gray-700">
-                                            Nom d&apos;utilisateur
+                                        <label htmlFor="email" className="block mb-2 text-sm font-semibold text-gray-700">
+                                            Email
                                         </label>
                                         <input
-                                            type="text"
-                                            id="username"
-                                            name="username"
-                                            value={username}
-                                            onChange={(e) => setUsername(e.target.value)}
+                                            type="email"
+                                            id="email"
+                                            name="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
                                             required
                                             className="w-full px-4 py-3 text-gray-900 border-2 border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                            placeholder="admin"
+                                            placeholder="votre@email.com"
                                         />
                                     </div>
 

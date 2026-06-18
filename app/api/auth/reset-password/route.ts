@@ -5,7 +5,7 @@ import { z } from 'zod';
 import crypto from 'crypto';
 
 const RequestResetSchema = z.object({
-    username: z.string().min(1, 'Le nom d\'utilisateur est requis'),
+    email: z.string().email('Email invalide'),
 });
 
 const ResetPasswordSchema = z.object({
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
         const data = await req.json();
 
         // Vérifier si c'est une demande de reset ou une réinitialisation
-        if ('username' in data) {
+        if ('email' in data) {
             // Demande de réinitialisation
             const parsed = RequestResetSchema.safeParse(data);
 
@@ -35,9 +35,9 @@ export async function POST(req: NextRequest) {
                 );
             }
 
-            const { username } = parsed.data;
+            const { email } = parsed.data;
 
-            const user = await prisma.user.findUnique({ where: { username } });
+            const user = await prisma.user.findFirst({ where: { email } });
 
             if (!user) {
                 // Pour la sécurité, on ne révèle pas si l'utilisateur existe
@@ -59,11 +59,12 @@ export async function POST(req: NextRequest) {
                 },
             });
 
-            // En production, vous devriez envoyer un email avec le token
-            // Pour le développement, on retourne le token (à ne JAMAIS faire en production)
+            // TODO: Intégrer un service d'envoi d'email (ex: Resend)
+            console.log(`Email de reset pour ${email} : ${resetToken}`);
+
             return NextResponse.json({
                 success: true,
-                message: 'Token de réinitialisation généré',
+                message: 'Si cet utilisateur existe, un email de réinitialisation sera envoyé.',
                 // ⚠️ À RETIRER EN PRODUCTION - juste pour le développement
                 token: process.env.NODE_ENV === 'development' ? resetToken : undefined,
             });

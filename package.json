@@ -12,6 +12,7 @@
     "db:studio": "prisma studio",
     "db:push": "prisma db push",
     "db:init-admin": "tsx scripts/init-admin.ts",
+    "db:update-email": "tsx scripts/update-user-email.ts",
     "postinstall": "npx prisma generate"
   },
   "dependencies": {

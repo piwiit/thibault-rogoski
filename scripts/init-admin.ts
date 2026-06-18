@@ -51,11 +51,13 @@ async function main() {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
+    const email = process.env.ADMIN_EMAIL || 'admin@example.com';
 
     await prisma.user.create({
         data: {
             username,
             passwordHash,
+            email,
         },
     });
 
