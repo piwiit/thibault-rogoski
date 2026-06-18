@@ -6,6 +6,7 @@ import {
   DEFAULT_KEYWORDS,
   SITE_NAME,
 } from "@/lib/seo";
+import { getLandingContent } from "@/lib/landing";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,21 +21,30 @@ const geistMono = Geist_Mono({
 const defaultDescription =
   "Artisan professionnel spécialisé en terrassement, VRD (Voirie et Réseaux Divers) et entretien paysager. Devis gratuit et intervention rapide.";
 
-export const metadata: Metadata = {
-  ...buildPageMetadata({
-    title: `${SITE_NAME} - Terrassement, VRD, Entretien Paysager`,
-    description: defaultDescription,
-    path: "/",
-  }),
-  keywords: DEFAULT_KEYWORDS,
-  applicationName: SITE_NAME,
-  category: "construction",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const content = await getLandingContent();
+  const favicon = content.site.faviconUrl || "/favicon.jpg";
+
+  return {
+    ...buildPageMetadata({
+      title: `${SITE_NAME} - Terrassement, VRD, Entretien Paysager`,
+      description: defaultDescription,
+      path: "/",
+    }),
+    keywords: DEFAULT_KEYWORDS,
+    applicationName: SITE_NAME,
+    category: "construction",
+    icons: {
+      icon: favicon,
+      apple: favicon,
+    },
+    formatDetection: {
+      email: false,
+      address: false,
+      telephone: false,
+    },
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import {
   defaultLandingContent,
   type LandingContent,
@@ -15,7 +16,7 @@ interface LandingPageFormProps {
 type Tab = 'hero' | 'services' | 'cta' | 'footer' | 'social';
 
 const tabs: { id: Tab; label: string }[] = [
-  { id: 'hero', label: 'Hero' },
+  { id: 'hero', label: 'Hero & Logo' },
   { id: 'services', label: 'Prestations' },
   { id: 'cta', label: 'Appel à l\'action' },
   { id: 'footer', label: 'Footer & Contact' },
@@ -29,6 +30,7 @@ const labelClass = 'block mb-2 text-sm font-semibold text-gray-700';
 export default function LandingPageForm({ onSuccess, onCancel }: LandingPageFormProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('hero');
   const [content, setContent] = useState<LandingContent>(defaultLandingContent);
 
@@ -48,6 +50,45 @@ export default function LandingPageForm({ onSuccess, onCancel }: LandingPageForm
     }
     fetchContent();
   }, []);
+
+  async function handleFaviconUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Veuillez sélectionner un fichier image');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Le fichier est trop volumineux (max 2MB)');
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Erreur lors de l\'upload');
+      }
+
+      updatePath('site', 'faviconUrl', data.imageUrl);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Erreur lors de l\'upload');
+    } finally {
+      setUploading(false);
+    }
+  }
 
   function updatePath<K extends keyof LandingContent>(
     section: K,
@@ -153,6 +194,35 @@ export default function LandingPageForm({ onSuccess, onCancel }: LandingPageForm
 
       {activeTab === 'hero' && (
         <div className="space-y-4">
+          <div className="p-4 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+            <label className={labelClass}>Favicon / Logo du site</label>
+            <div className="flex items-center gap-6">
+              <div className="relative w-16 h-16 bg-white rounded-lg border border-gray-200 overflow-hidden flex items-center justify-center">
+                {content.site.faviconUrl ? (
+                  <Image
+                    src={content.site.faviconUrl}
+                    alt="Favicon"
+                    fill
+                    className="object-contain p-1"
+                  />
+                ) : (
+                  <span className="text-2xl">🌍</span>
+                )}
+              </div>
+              <div className="flex-1">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFaviconUpload}
+                  disabled={uploading}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 disabled:opacity-50"
+                />
+                <p className="mt-1 text-xs text-gray-500">JPG, PNG ou SVG. Max 2MB.</p>
+                {uploading && <p className="mt-1 text-xs text-green-600 font-semibold animate-pulse">Upload en cours...</p>}
+              </div>
+            </div>
+          </div>
+
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className={labelClass}>Badge</label>

@@ -14,6 +14,7 @@ export interface LandingContent {
   site: {
     brandName: string;
     brandInitials: string;
+    faviconUrl?: string;
   };
   hero: {
     badge: string;
