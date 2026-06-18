@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getSession } from '@/lib/auth';
+import { revalidatePath } from 'next/cache';
 import {
   defaultLandingContent,
   getLandingContent,
@@ -25,6 +26,7 @@ const landingContentSchema = z.object({
   site: z.object({
     brandName: z.string().min(1),
     brandInitials: z.string().min(1).max(4),
+    faviconUrl: z.string().optional(),
   }),
   hero: z.object({
     badge: z.string().min(1),
@@ -87,6 +89,8 @@ export async function PUT(req: NextRequest) {
     }
 
     await saveLandingContent(parsed.data as LandingContent);
+    revalidatePath('/', 'layout');
+    
     return NextResponse.json({ success: true, content: parsed.data });
   } catch (error) {
     console.error('PUT /api/settings/landing error:', error);
