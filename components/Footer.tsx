@@ -82,6 +82,11 @@ export default function Footer({ landingContent }: FooterProps) {
                   Contact
                 </Link>
               </li>
+              <li>
+                <Link href="/confidentialite" className="text-gray-400 transition-colors hover:text-green-400">
+                  Confidentialité
+                </Link>
+              </li>
             </ul>
           </div>
 
