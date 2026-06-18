@@ -127,6 +127,8 @@ function getImageMimeType(filePath: string): string {
 }
 
 function buildPublicImageUrl(imageUrl: string): string | null {
+  if (imageUrl.startsWith('http')) return imageUrl;
+
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL;
   if (!siteUrl) return null;
 
