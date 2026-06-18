@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import type { LandingContent } from "@/lib/landing";
 import { useLandingContent } from "@/hooks/useLandingContent";
@@ -11,6 +12,7 @@ interface NavbarProps {
 
 export default function Navbar({ landingContent }: NavbarProps) {
   const content = useLandingContent(landingContent);
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -21,6 +23,8 @@ export default function Navbar({ landingContent }: NavbarProps) {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const isActive = (path: string) => pathname === path;
 
   return (
     <>
@@ -45,7 +49,7 @@ export default function Navbar({ landingContent }: NavbarProps) {
               <li>
                 <Link
                   href="/"
-                  className="font-medium text-gray-700 transition-colors hover:text-green-600"
+                  className={`font-medium transition-colors ${isActive('/') ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`}
                 >
                   Accueil
                 </Link>
@@ -53,7 +57,7 @@ export default function Navbar({ landingContent }: NavbarProps) {
               <li>
                 <Link
                   href="/projets"
-                  className="font-medium text-gray-700 transition-colors hover:text-green-600"
+                  className={`font-medium transition-colors ${isActive('/projets') ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`}
                 >
                   Projets
                 </Link>
@@ -61,7 +65,7 @@ export default function Navbar({ landingContent }: NavbarProps) {
               <li>
                 <Link
                   href="/admin"
-                  className="font-medium text-gray-700 transition-colors hover:text-green-600"
+                  className={`font-medium transition-colors ${pathname.startsWith('/admin') ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`}
                 >
                   Admin
                 </Link>
@@ -69,7 +73,7 @@ export default function Navbar({ landingContent }: NavbarProps) {
               <li>
                 <Link
                   href="/contact"
-                  className="px-4 py-2 font-semibold text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700"
+                  className={`px-4 py-2 font-semibold text-white transition-colors rounded-lg shadow-md ${isActive('/contact') ? 'bg-green-700' : 'bg-green-600 hover:bg-green-700'}`}
                 >
                   Contact
                 </Link>
@@ -110,7 +114,7 @@ export default function Navbar({ landingContent }: NavbarProps) {
                 <Link
                   href="/"
                   onClick={() => setIsOpen(false)}
-                  className="block font-medium text-gray-700 hover:text-green-600"
+                  className={`block font-medium transition-colors ${isActive('/') ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`}
                 >
                   Accueil
                 </Link>
@@ -119,7 +123,7 @@ export default function Navbar({ landingContent }: NavbarProps) {
                 <Link
                   href="/projets"
                   onClick={() => setIsOpen(false)}
-                  className="block font-medium text-gray-700 hover:text-green-600"
+                  className={`block font-medium transition-colors ${isActive('/projets') ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`}
                 >
                   Projets
                 </Link>
@@ -128,7 +132,7 @@ export default function Navbar({ landingContent }: NavbarProps) {
                 <Link
                   href="/admin"
                   onClick={() => setIsOpen(false)}
-                  className="block font-medium text-gray-700 hover:text-green-600"
+                  className={`block font-medium transition-colors ${pathname.startsWith('/admin') ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`}
                 >
                   Admin
                 </Link>
@@ -137,7 +141,7 @@ export default function Navbar({ landingContent }: NavbarProps) {
                 <Link
                   href="/contact"
                   onClick={() => setIsOpen(false)}
-                  className="block px-4 py-2 font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700"
+                  className={`block px-4 py-2 font-semibold text-center text-white transition-colors rounded-lg ${isActive('/contact') ? 'bg-green-700' : 'bg-green-600 hover:bg-green-700'}`}
                 >
                   Contact
                 </Link>
