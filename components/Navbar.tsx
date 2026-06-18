@@ -60,6 +60,14 @@ export default function Navbar({ landingContent }: NavbarProps) {
               </li>
               <li>
                 <Link
+                  href="/admin"
+                  className="font-medium text-gray-700 transition-colors hover:text-green-600"
+                >
+                  Admin
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/contact"
                   className="px-4 py-2 font-semibold text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700"
                 >
@@ -114,6 +122,15 @@ export default function Navbar({ landingContent }: NavbarProps) {
                   className="block font-medium text-gray-700 hover:text-green-600"
                 >
                   Projets
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className="block font-medium text-gray-700 hover:text-green-600"
+                >
+                  Admin
                 </Link>
               </li>
               <li>
