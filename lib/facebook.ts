@@ -13,9 +13,18 @@ function getFacebookConfig() {
   const pageId = process.env.FACEBOOK_PAGE_ID;
   const token = process.env.FACEBOOK_PAGE_TOKEN;
 
+  console.log('Diagnostic Facebook Config:', {
+    hasPageId: !!pageId,
+    pageIdLength: pageId?.length || 0,
+    hasToken: !!token,
+    tokenLength: token?.length || 0,
+    nodeEnv: process.env.NODE_ENV
+  });
+
   if (!pageId || !token) {
     throw new Error(
-      'FACEBOOK_PAGE_ID et FACEBOOK_PAGE_TOKEN doivent être configurés dans le fichier .env'
+      `FACEBOOK_PAGE_ID (${!!pageId}) et FACEBOOK_PAGE_TOKEN (${!!token}) doivent être configurés. ` +
+      `Vérifiez les variables d'environnement sur Vercel.`
     );
   }
 
