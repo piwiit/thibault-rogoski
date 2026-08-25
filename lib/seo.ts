@@ -112,10 +112,11 @@ export function buildLocalBusinessJsonLd(content: LandingContent) {
     image: absoluteUrl(DEFAULT_OG_IMAGE),
     telephone: content.footer.phone,
     email: content.footer.email,
-    areaServed: {
-      '@type': 'Country',
-      name: 'France',
-    },
+    areaServed: [
+       { '@type': 'City', name: 'Longèves' },
+        { '@type': 'City', name: 'La Rochelle' },
+        { '@type': 'AdministrativeArea', name: 'Charente-Maritime' },
+],
     serviceType: content.services.items.map((service) => service.title),
     sameAs,
   };
