@@ -18,7 +18,7 @@ export const DEFAULT_KEYWORDS = [
 ];
 
 export function getSiteUrl(): string {
-  const url = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || 'https://thibault-rogoski.vercel.app';
+  const url = 'https://thibault-rogoski.vercel.app';
   return url.replace(/\/$/, '');
 }
 
