@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyPassword, createSessionCookie } from '@/lib/auth';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 import { z } from 'zod';
 
 const LoginSchema = z.object({
@@ -10,12 +11,21 @@ const LoginSchema = z.object({
 
 export async function POST(req: NextRequest) {
     try {
+        const ip = getClientIp(req);
+        const rateCheck = checkRateLimit('login', ip, 5, 15 * 60 * 1000); // 5 tentatives / 15 min
+        if (!rateCheck.allowed) {
+            return NextResponse.json(
+                { error: `Trop de tentatives de connexion. Réessayez dans ${rateCheck.retryAfterSeconds} secondes.` },
+                { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfterSeconds) } }
+            );
+        }
+
         const data = await req.json();
         const parsed = LoginSchema.safeParse(data);
 
         if (!parsed.success) {
             return NextResponse.json(
-                { error: 'Invalid data', details: parsed.error.issues },
+                { error: 'Données invalides', details: parsed.error.issues },
                 { status: 400 }
             );
         }
@@ -45,10 +55,10 @@ export async function POST(req: NextRequest) {
 
         return response;
     } catch (e) {
+        console.error('Login error:', e);
         return NextResponse.json(
-            { error: 'Server error', details: e instanceof Error ? e.message : e },
+            { error: 'Erreur serveur lors de la connexion' },
             { status: 500 }
         );
     }
 }
-

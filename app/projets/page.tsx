@@ -1,45 +1,22 @@
-"use client";
-import React, { useEffect, useState } from 'react';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
-import ProjectCard from '../../components/ProjectCard';
+import React from 'react';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import ProjectCard from '@/components/ProjectCard';
 import Link from 'next/link';
+import { prisma } from '@/lib/prisma';
+import { getLandingContent } from '@/lib/landing';
 
-interface Project {
-  id: number;
-  title: string;
-  category: string;
-  description: string;
-  imageUrl: string | null;
-  createdAt: string;
-}
+export const dynamic = 'force-dynamic';
 
-export default function ProjetsPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchProjects() {
-      try {
-        const res = await fetch('/api/projects');
-        if (!res.ok) {
-          throw new Error('Erreur lors du chargement des projets');
-        }
-        const data = await res.json();
-        setProjects(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Une erreur est survenue');
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchProjects();
-  }, []);
+export default async function ProjetsPage() {
+  const [projects, landingContent] = await Promise.all([
+    prisma.project.findMany({ orderBy: { createdAt: 'desc' } }),
+    getLandingContent(),
+  ]);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      <Navbar />
+      <Navbar landingContent={landingContent} />
       <main className="flex-1 pt-24 pb-20">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
@@ -51,26 +28,7 @@ export default function ProjetsPage() {
             </p>
           </div>
 
-          {loading && (
-            <div className="py-20 text-center">
-              <div className="inline-block w-12 h-12 mb-4 border-b-2 border-green-600 rounded-full animate-spin"></div>
-              <p className="text-xl text-gray-600">Chargement des projets...</p>
-            </div>
-          )}
-
-          {error && (
-            <div className="py-20 text-center">
-              <p className="mb-4 text-xl text-red-600">Erreur : {error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-6 py-3 font-semibold text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700"
-              >
-                Réessayer
-              </button>
-            </div>
-          )}
-
-          {!loading && !error && projects.length === 0 && (
+          {projects.length === 0 ? (
             <div className="py-20 text-center">
               <div className="mb-4 text-6xl">📋</div>
               <p className="mb-4 text-xl text-gray-600">Aucun projet disponible pour le moment.</p>
@@ -81,12 +39,17 @@ export default function ProjetsPage() {
                 Contactez-nous pour un devis
               </Link>
             </div>
-          )}
-
-          {!loading && !error && projects.length > 0 && (
+          ) : (
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
               {projects.map((p) => (
-                <ProjectCard key={p.id} {...p} />
+                <ProjectCard
+                  key={p.id}
+                  id={p.id}
+                  title={p.title}
+                  category={p.category}
+                  description={p.description}
+                  imageUrl={p.imageUrl}
+                />
               ))}
             </div>
           )}
@@ -104,7 +67,7 @@ export default function ProjetsPage() {
           </div>
         </div>
       </main>
-      <Footer />
+      <Footer landingContent={landingContent} />
     </div>
   );
 }

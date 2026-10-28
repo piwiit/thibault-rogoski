@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { defaultLandingContent, type LandingContent } from '@/lib/landing';
+import { defaultLandingContent, type LandingContent } from '@/lib/landing.types';
 
 export function useLandingContent(initialContent?: LandingContent) {
   const [content, setContent] = useState<LandingContent>(initialContent ?? defaultLandingContent);

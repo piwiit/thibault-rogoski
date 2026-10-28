@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 
@@ -11,7 +12,6 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        // Vérifier si déjà connecté
         fetch('/api/auth/me')
             .then(res => {
                 if (res.ok) {
@@ -125,12 +125,12 @@ export default function LoginPage() {
                         </form>
 
                         <div className="mt-6 text-center">
-                            <a
+                            <Link
                                 href="/forgot-password"
                                 className="text-sm font-medium text-green-600 hover:text-green-700"
                             >
                                 Mot de passe oublié ?
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -139,4 +139,3 @@ export default function LoginPage() {
         </div>
     );
 }
-

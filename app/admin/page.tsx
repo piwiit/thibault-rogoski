@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
@@ -33,11 +33,7 @@ export default function AdminPage() {
     const [user, setUser] = useState<{ id: number; username: string; email?: string } | null>(null);
     const [authLoading, setAuthLoading] = useState(true);
 
-    useEffect(() => {
-        checkAuth();
-    }, []);
-
-    async function checkAuth() {
+    const checkAuth = useCallback(async () => {
         try {
             const res = await fetch('/api/auth/me');
             if (!res.ok) {
@@ -47,13 +43,17 @@ export default function AdminPage() {
             const data = await res.json();
             setUser(data.user);
             fetchProjects();
-        } catch (err) {
+        } catch {
             router.push('/login');
         } finally {
             setAuthLoading(false);
             setLoading(false);
         }
-    }
+    }, [router]);
+
+    useEffect(() => {
+        checkAuth();
+    }, [checkAuth]);
 
     async function fetchProjects() {
         try {

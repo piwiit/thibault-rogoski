@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import type { LandingContent } from '@/lib/landing';
+import type { LandingContent } from '@/lib/landing.types';
 import { useLandingContent } from '@/hooks/useLandingContent';
 
 interface FooterProps {
@@ -36,7 +36,23 @@ function SocialLink({
 export default function Footer({ landingContent }: FooterProps) {
   const content = useLandingContent(landingContent);
   const currentYear = new Date().getFullYear();
-  const phoneHref = `tel:${content.footer.phone.replace(/[^\d+]/g, '')}`;
+
+  // Encode phone number on the server side (SSR). This prevents the raw number from appearing in the initial HTML.
+  const encodedPhone = typeof window === 'undefined'
+    ? Buffer.from(content.footer.phone, 'utf-8').toString('base64')
+    : '';
+
+  const [phone, setPhone] = useState('');
+  const [phoneHref, setPhoneHref] = useState('#');
+
+  // Decode on the client side.
+  useEffect(() => {
+    if (encodedPhone) {
+      const decoded = atob(encodedPhone);
+      setPhone(decoded);
+      setPhoneHref(`tel:${decoded.replace(/[^\\d+]/g, '')}`);
+    }
+  }, [encodedPhone]);
 
   return (
     <footer className="text-white bg-gray-900">
@@ -68,24 +84,19 @@ export default function Footer({ landingContent }: FooterProps) {
             <h3 className="mb-4 text-xl font-bold text-green-400">Liens rapides</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/" className="text-gray-400 transition-colors hover:text-green-400">
-                  Accueil
-                </Link>
+                <Link href="/" className="text-gray-400 transition-colors hover:text-green-400">Accueil</Link>
               </li>
               <li>
-                <Link href="/projets" className="text-gray-400 transition-colors hover:text-green-400">
-                  Nos projets
-                </Link>
+                <Link href="/projets" className="text-gray-400 transition-colors hover:text-green-400">Nos projets</Link>
               </li>
               <li>
-                <Link href="/contact" className="text-gray-400 transition-colors hover:text-green-400">
-                  Contact
-                </Link>
+                <Link href="/contact" className="text-gray-400 transition-colors hover:text-green-400">Contact</Link>
               </li>
               <li>
-                <Link href="/confidentialite" className="text-gray-400 transition-colors hover:text-green-400">
-                  Confidentialité
-                </Link>
+                <Link href="/confidentialite" className="text-gray-400 transition-colors hover:text-green-400">Confidentialité</Link>
+              </li>
+              <li>
+                <Link href="/admin" className="text-xs text-gray-500 transition-colors hover:text-gray-400">Espace Pro</Link>
               </li>
             </ul>
           </div>
@@ -98,7 +109,7 @@ export default function Footer({ landingContent }: FooterProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
                 <a href={phoneHref} className="transition-colors hover:text-green-400">
-                  {content.footer.phone}
+                  {phone}
                 </a>
               </li>
               <li className="flex items-center">

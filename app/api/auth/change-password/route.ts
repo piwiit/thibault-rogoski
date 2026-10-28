@@ -5,7 +5,12 @@ import { z } from 'zod';
 
 const ChangePasswordSchema = z.object({
     currentPassword: z.string().min(1, 'Le mot de passe actuel est requis'),
-    newPassword: z.string().min(6, 'Le nouveau mot de passe doit contenir au moins 6 caractères'),
+    newPassword: z
+        .string()
+        .min(8, 'Le mot de passe doit comporter au moins 8 caractères')
+        .regex(/[A-Z]/, 'Le mot de passe doit contenir au moins une majuscule')
+        .regex(/[a-z]/, 'Le mot de passe doit contenir au moins une minuscule')
+        .regex(/[0-9]/, 'Le mot de passe doit contenir au moins un chiffre'),
 });
 
 export async function POST(req: NextRequest) {
@@ -24,7 +29,7 @@ export async function POST(req: NextRequest) {
 
         if (!parsed.success) {
             return NextResponse.json(
-                { error: 'Invalid data', details: parsed.error.issues },
+                { error: 'Données invalides', details: parsed.error.issues },
                 { status: 400 }
             );
         }
@@ -44,7 +49,7 @@ export async function POST(req: NextRequest) {
 
         if (!isValid) {
             return NextResponse.json(
-                { error: 'Mot de passe actuel incorrect' },
+                { error: 'Le mot de passe actuel est incorrect' },
                 { status: 400 }
             );
         }
@@ -58,10 +63,10 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ success: true, message: 'Mot de passe modifié avec succès' });
     } catch (e) {
+        console.error('Change password error:', e);
         return NextResponse.json(
-            { error: 'Server error', details: e instanceof Error ? e.message : e },
+            { error: 'Une erreur serveur est survenue lors du changement de mot de passe' },
             { status: 500 }
         );
     }
 }
-

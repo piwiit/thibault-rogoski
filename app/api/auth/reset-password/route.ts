@@ -1,89 +1,103 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword } from '@/lib/auth';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 import { z } from 'zod';
 import crypto from 'crypto';
 
 const RequestResetSchema = z.object({
-    email: z.string().email('Email invalide'),
+    email: z.string().email('Adresse email invalide'),
 });
 
 const ResetPasswordSchema = z.object({
     token: z.string().min(1, 'Le token est requis'),
-    newPassword: z.string().min(6, 'Le nouveau mot de passe doit contenir au moins 6 caractères'),
+    newPassword: z
+        .string()
+        .min(8, 'Le mot de passe doit comporter au moins 8 caractères')
+        .regex(/[A-Z]/, 'Le mot de passe doit contenir au moins une majuscule')
+        .regex(/[a-z]/, 'Le mot de passe doit contenir au moins une minuscule')
+        .regex(/[0-9]/, 'Le mot de passe doit contenir au moins un chiffre'),
 });
 
-// Générer un token de réinitialisation
-function generateResetToken(): string {
-    return crypto.randomBytes(32).toString('hex');
+function hashResetToken(token: string): string {
+    return crypto.createHash('sha256').update(token).digest('hex');
 }
 
-// Demander une réinitialisation (génère un token)
 export async function POST(req: NextRequest) {
     try {
+        const ip = getClientIp(req);
         const data = await req.json();
 
-        // Vérifier si c'est une demande de reset ou une réinitialisation
+        // 1. Demande de réinitialisation
         if ('email' in data) {
-            // Demande de réinitialisation
-            const parsed = RequestResetSchema.safeParse(data);
+            const rateCheck = checkRateLimit('reset-request', ip, 3, 15 * 60 * 1000); // 3 demandes / 15 min
+            if (!rateCheck.allowed) {
+                return NextResponse.json(
+                    { error: 'Trop de demandes de réinitialisation. Veuillez patienter avant de réessayer.' },
+                    { status: 429 }
+                );
+            }
 
+            const parsed = RequestResetSchema.safeParse(data);
             if (!parsed.success) {
                 return NextResponse.json(
-                    { error: 'Invalid data', details: parsed.error.issues },
+                    { error: 'Données invalides', details: parsed.error.issues },
                     { status: 400 }
                 );
             }
 
             const { email } = parsed.data;
-
             const user = await prisma.user.findFirst({ where: { email } });
 
+            // Réponse uniforme pour éviter l'énumération des utilisateurs
+            const genericResponse = {
+                success: true,
+                message: 'Si cette adresse email est associée à un compte, un lien de réinitialisation vous sera envoyé.',
+            };
+
             if (!user) {
-                // Pour la sécurité, on ne révèle pas si l'utilisateur existe
-                return NextResponse.json({
-                    success: true,
-                    message: 'Si cet utilisateur existe, un email de réinitialisation sera envoyé.'
-                });
+                return NextResponse.json(genericResponse);
             }
 
-            const resetToken = generateResetToken();
+            const rawToken = crypto.randomBytes(32).toString('hex');
+            const hashedToken = hashResetToken(rawToken);
+
             const resetTokenExpiry = new Date();
-            resetTokenExpiry.setHours(resetTokenExpiry.getHours() + 1); // Token valide 1 heure
+            resetTokenExpiry.setHours(resetTokenExpiry.getHours() + 1); // 1 heure de validité
 
             await prisma.user.update({
                 where: { id: user.id },
                 data: {
-                    resetToken,
+                    resetToken: hashedToken,
                     resetTokenExpiry,
                 },
             });
 
-            // TODO: Intégrer un service d'envoi d'email (ex: Resend)
-            console.log(`Email de reset pour ${email} : ${resetToken}`);
+            console.log(`[AUTH] Token de réinitialisation généré pour ${email}`);
 
             return NextResponse.json({
-                success: true,
-                message: 'Si cet utilisateur existe, un email de réinitialisation sera envoyé.',
-                // ⚠️ À RETIRER EN PRODUCTION - juste pour le développement
-                token: process.env.NODE_ENV === 'development' ? resetToken : undefined,
+                ...genericResponse,
+                // Le token en clair n'est retourné qu'en développement local pour le debug
+                token: process.env.NODE_ENV === 'development' ? rawToken : undefined,
             });
-        } else if ('token' in data) {
-            // Réinitialisation avec token
-            const parsed = ResetPasswordSchema.safeParse(data);
+        }
 
+        // 2. Réinitialisation avec token
+        if ('token' in data) {
+            const parsed = ResetPasswordSchema.safeParse(data);
             if (!parsed.success) {
                 return NextResponse.json(
-                    { error: 'Invalid data', details: parsed.error.issues },
+                    { error: 'Données invalides', details: parsed.error.issues },
                     { status: 400 }
                 );
             }
 
             const { token, newPassword } = parsed.data;
+            const hashedToken = hashResetToken(token);
 
             const user = await prisma.user.findFirst({
                 where: {
-                    resetToken: token,
+                    resetToken: hashedToken,
                     resetTokenExpiry: {
                         gt: new Date(),
                     },
@@ -92,7 +106,7 @@ export async function POST(req: NextRequest) {
 
             if (!user) {
                 return NextResponse.json(
-                    { error: 'Token invalide ou expiré' },
+                    { error: 'Le token de réinitialisation est invalide ou a expiré' },
                     { status: 400 }
                 );
             }
@@ -110,19 +124,16 @@ export async function POST(req: NextRequest) {
 
             return NextResponse.json({
                 success: true,
-                message: 'Mot de passe réinitialisé avec succès'
+                message: 'Mot de passe réinitialisé avec succès',
             });
-        } else {
-            return NextResponse.json(
-                { error: 'Invalid request' },
-                { status: 400 }
-            );
         }
+
+        return NextResponse.json({ error: 'Requête invalide' }, { status: 400 });
     } catch (e) {
+        console.error('Reset password error:', e);
         return NextResponse.json(
-            { error: 'Server error', details: e instanceof Error ? e.message : e },
+            { error: 'Une erreur serveur est survenue' },
             { status: 500 }
         );
     }
 }
-

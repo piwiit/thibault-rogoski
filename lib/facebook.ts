@@ -13,18 +13,9 @@ function getFacebookConfig() {
   const pageId = process.env.FACEBOOK_PAGE_ID;
   const token = process.env.FACEBOOK_PAGE_TOKEN;
 
-  console.log('Diagnostic Facebook Config:', {
-    hasPageId: !!pageId,
-    pageIdLength: pageId?.length || 0,
-    hasToken: !!token,
-    tokenLength: token?.length || 0,
-    nodeEnv: process.env.NODE_ENV
-  });
-
   if (!pageId || !token) {
     throw new Error(
-      `FACEBOOK_PAGE_ID (${!!pageId}) et FACEBOOK_PAGE_TOKEN (${!!token}) doivent être configurés. ` +
-      `Vérifiez les variables d'environnement sur Vercel.`
+      `FACEBOOK_PAGE_ID (${Boolean(pageId)}) et FACEBOOK_PAGE_TOKEN (${Boolean(token)}) doivent être configurés.`
     );
   }
 
@@ -74,8 +65,7 @@ async function assertCanManagePages(token: string): Promise<void> {
   if (!granted.has('pages_manage_posts')) {
     throw new Error(
       'Le token Facebook n\'a pas la permission "pages_manage_posts". ' +
-      'Régénérez un token utilisateur avec pages_show_list, pages_manage_posts et pages_read_engagement, ' +
-      'puis mettez à jour FACEBOOK_PAGE_TOKEN dans le .env.'
+      'Régénérez un token utilisateur avec pages_show_list, pages_manage_posts et pages_read_engagement.'
     );
   }
 
@@ -100,14 +90,12 @@ async function resolvePageAccessToken(pageId: string, token: string): Promise<st
   if ((accountsData.data?.length ?? 0) === 0) {
     throw new Error(
       `Aucune page Facebook accessible avec ce token. ` +
-      `Vérifiez que FACEBOOK_PAGE_ID (${pageId}) correspond à une page que vous administrez ` +
-      `et que le token possède les permissions pages_show_list et pages_manage_posts.`
+      `Vérifiez que FACEBOOK_PAGE_ID (${pageId}) correspond à une page que vous administrez.`
     );
   }
 
   throw new Error(
-    `La page Facebook ${pageId} est introuvable dans les pages liées à ce token. ` +
-    `Vérifiez FACEBOOK_PAGE_ID dans le .env.`
+    `La page Facebook ${pageId} est introuvable dans les pages liées à ce token.`
   );
 }
 
@@ -117,9 +105,19 @@ async function getPageToken(): Promise<string> {
   return resolvePageAccessToken(pageId, token);
 }
 
-function resolveLocalImagePath(imageUrl: string): string {
-  const relativePath = imageUrl.replace(/^\/+/, '');
-  return path.join(process.cwd(), 'public', relativePath);
+function resolveLocalImagePath(imageUrl: string): string | null {
+  // Supprime tout slash initial et normalise le chemin
+  const relativePath = path.normalize(imageUrl.replace(/^\/+/, ''));
+  const fullPath = path.resolve(process.cwd(), 'public', relativePath);
+  const allowedBaseDir = path.resolve(process.cwd(), 'public', 'images');
+
+  // Sécurité anti-traversée de répertoire : le chemin doit obligatoirement résider dans public/images
+  if (!fullPath.startsWith(allowedBaseDir + path.sep) && fullPath !== allowedBaseDir) {
+    console.warn(`Tentative d'accès hors du répertoire public/images bloquée : ${imageUrl}`);
+    return null;
+  }
+
+  return fullPath;
 }
 
 function getImageMimeType(filePath: string): string {
@@ -188,7 +186,7 @@ export async function postToFacebook(
         };
       }
 
-      if (fs.existsSync(localPath)) {
+      if (localPath && fs.existsSync(localPath)) {
         const fileBuffer = fs.readFileSync(localPath);
         const mimeType = getImageMimeType(localPath);
         const formData = new FormData();
@@ -210,7 +208,7 @@ export async function postToFacebook(
         };
       }
 
-      console.warn(`Image introuvable (${localPath}), publication texte uniquement.`);
+      console.warn(`Image introuvable ou chemin non autorisé (${imageUrl}), publication texte uniquement.`);
     }
 
     const postData = await fetchGraphApi<{ id?: string }>(
@@ -303,8 +301,6 @@ export async function syncProjectToFacebook(options: {
     return postToFacebook(message, imageUrl);
   }
 
-  // L'API de mise à jour (POST /{post-id}) renvoie souvent l'erreur #3
-  // ("Application does not have the capability"). On supprime puis on republie.
   const deleteResult = await deleteFacebookPost(existingPostId);
   if (!deleteResult.success) {
     console.warn('Ancien post Facebook non supprimé:', deleteResult.error);

@@ -27,10 +27,10 @@ export async function GET() {
 
         return NextResponse.json({ user });
     } catch (e) {
+        console.error('GET /api/auth/me error:', e);
         return NextResponse.json(
-            { error: 'Server error', details: e instanceof Error ? e.message : e },
+            { error: 'Erreur lors de la récupération du profil' },
             { status: 500 }
         );
     }
 }
-

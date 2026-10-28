@@ -90,7 +90,7 @@ export async function PUT(req: NextRequest) {
 
     await saveLandingContent(parsed.data as LandingContent);
     revalidatePath('/', 'layout');
-    
+
     return NextResponse.json({ success: true, content: parsed.data });
   } catch (error) {
     console.error('PUT /api/settings/landing error:', error);

@@ -6,7 +6,7 @@ import {
   defaultLandingContent,
   type LandingContent,
   type ServiceItem,
-} from '@/lib/landing';
+} from '@/lib/landing.types';
 
 interface LandingPageFormProps {
   onSuccess: () => void;

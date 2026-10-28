@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { getLandingContent, saveLandingContent } from '@/lib/landing';
+import { z } from 'zod';
+
+const SocialLinksSchema = z.object({
+  facebook: z.string().trim().url('URL Facebook invalide').or(z.literal('')).optional(),
+  instagram: z.string().trim().url('URL Instagram invalide').or(z.literal('')).optional(),
+  linkedin: z.string().trim().url('URL LinkedIn invalide').or(z.literal('')).optional(),
+});
 
 export async function GET() {
   try {
@@ -24,12 +31,21 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+    const parsed = SocialLinksSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Données invalides', details: parsed.error.issues },
+        { status: 400 }
+      );
+    }
+
     const content = await getLandingContent();
 
     content.social = {
-      facebook: body.facebook || '',
-      instagram: body.instagram || '',
-      linkedin: body.linkedin || '',
+      facebook: parsed.data.facebook ?? '',
+      instagram: parsed.data.instagram ?? '',
+      linkedin: parsed.data.linkedin ?? '',
     };
 
     await saveLandingContent(content);
@@ -40,6 +56,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('POST /api/settings/social-links error:', error);
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+    return NextResponse.json({ error: 'Erreur lors de la mise à jour' }, { status: 500 });
   }
 }

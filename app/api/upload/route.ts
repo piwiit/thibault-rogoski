@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getSession } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
     try {
-         const supabase = getSupabaseClient();
+        const userId = await getSession();
+        if (!userId) {
+            return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+        }
+
+        const supabase = getSupabaseClient();
         const formData = await req.formData();
         const file = formData.get('file') as File;
 
@@ -11,7 +17,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Aucun fichier fourni' }, { status: 400 });
         }
 
-        // Vérifier le type de fichier
+        // Vérifier le type MIME
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
         if (!allowedTypes.includes(file.type)) {
             return NextResponse.json(
@@ -29,13 +35,13 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Générer un nom de fichier unique
+        // Générer un nom de fichier unique et sécurisé (supprimer tout caractère non alphanumérique)
         const timestamp = Date.now();
-        const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_').replace(/\.{2,}/g, '.');
         const filename = `${timestamp}_${sanitizedName}`;
 
         // Upload vers Supabase
-        const { data, error } = await supabase.storage
+        const { error } = await supabase.storage
             .from('Image')
             .upload(filename, file, {
                 contentType: file.type,
@@ -56,9 +62,8 @@ export async function POST(req: NextRequest) {
     } catch (e) {
         console.error('Upload error:', e);
         return NextResponse.json(
-            { error: 'Erreur lors de l\'upload', details: e instanceof Error ? e.message : e },
+            { error: 'Erreur lors du traitement de l\'upload' },
             { status: 500 }
         );
     }
 }
-

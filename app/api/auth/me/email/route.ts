@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
 const UpdateEmailSchema = z.object({
-    email: z.string().email('Email invalide'),
+    email: z.string().trim().email('Adresse email invalide'),
 });
 
 export async function PUT(req: NextRequest) {
@@ -40,8 +40,9 @@ export async function PUT(req: NextRequest) {
             message: 'Email mis à jour avec succès'
         });
     } catch (e) {
+        console.error('PUT /api/auth/me/email error:', e);
         return NextResponse.json(
-            { error: 'Server error', details: e instanceof Error ? e.message : e },
+            { error: 'Erreur lors de la mise à jour de l\'adresse email' },
             { status: 500 }
         );
     }

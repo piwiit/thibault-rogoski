@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import type { LandingContent } from '@/lib/landing';
+import type { LandingContent } from '@/lib/landing.types';
 
 interface HeroProps {
   content: LandingContent;

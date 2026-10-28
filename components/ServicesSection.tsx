@@ -1,6 +1,6 @@
 "use client";
 import { motion } from 'framer-motion';
-import type { LandingContent } from '@/lib/landing';
+import type { LandingContent } from '@/lib/landing.types';
 
 const cardVariants = {
     hidden: { opacity: 0, y: 30 },

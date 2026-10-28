@@ -3,7 +3,7 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import type { LandingContent } from "@/lib/landing";
+import type { LandingContent } from "@/lib/landing.types";
 import { useLandingContent } from "@/hooks/useLandingContent";
 
 interface NavbarProps {
@@ -31,10 +31,11 @@ export default function Navbar({ landingContent }: NavbarProps) {
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${scrolled
+        className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${
+          scrolled
             ? "bg-white shadow-lg py-3"
             : "bg-white/95 backdrop-blur-sm py-4"
-          }`}
+        }`}
       >
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
@@ -65,7 +66,7 @@ export default function Navbar({ landingContent }: NavbarProps) {
               <li>
                 <Link
                   href="/admin"
-                  className={`font-medium transition-colors ${pathname.startsWith('/admin') ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`}
+                  className={`font-medium transition-colors ${isActive('/admin') ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`}
                 >
                   Admin
                 </Link>
@@ -126,15 +127,6 @@ export default function Navbar({ landingContent }: NavbarProps) {
                   className={`block font-medium transition-colors ${isActive('/projets') ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`}
                 >
                   Projets
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/admin"
-                  onClick={() => setIsOpen(false)}
-                  className={`block font-medium transition-colors ${pathname.startsWith('/admin') ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`}
-                >
-                  Admin
                 </Link>
               </li>
               <li>
